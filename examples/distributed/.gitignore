@@ -1,0 +1,5 @@
+# Transient artifacts created when the distributed demo runs.
+.logs/
+conversation_logs/
+logs_*/
+registry_url.txt

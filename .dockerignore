@@ -1,0 +1,29 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+neo4j_data/
+.env
+.git/
+# Slim service image needs only schema/ + service/ — exclude everything else
+# from the build context so deploys upload fast.
+dashboard/
+examples/
+docs/
+tests/
+tests_service/
+scripts/
+conversation_logs/
+api/
+ingest/
+cli/
+middleware/
+federation/
+store/
+*.png
+*.md
+docker-compose.yml
+run_demo.py
+run_distributed_demo.py

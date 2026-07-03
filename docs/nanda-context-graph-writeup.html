@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nanda-context-graph — Project Write-up</title>
+<style>
+  :root{
+    --ink:#14304f; --brand:#1a3c6e; --brand2:#2f6db3;
+    --bg:#f6f8fb; --card:#ffffff; --line:#e2e8f1; --muted:#5b6b80;
+    --code:#eef2f7; --ok:#1d7a52; --accent:#eaf1fa;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;color:var(--ink);background:var(--bg);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  a{color:var(--brand2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{background:var(--code);padding:.1em .4em;border-radius:4px;font-size:.9em;
+    font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace}
+  pre{background:#0f2540;color:#dce7f4;padding:18px 20px;border-radius:10px;overflow:auto;
+    font-size:13.5px;line-height:1.5;font-family:"SFMono-Regular",Consolas,Menlo,monospace}
+  pre code{background:none;padding:0;color:inherit}
+
+  /* layout */
+  header.top{
+    position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);
+    backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid var(--line);
+  }
+  .nav{max-width:1060px;margin:0 auto;padding:12px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .nav .brand{font-weight:700;color:var(--brand);font-size:17px;margin-right:auto}
+  .nav a{color:var(--muted);font-size:14px;font-weight:600}
+  .nav a:hover{color:var(--brand)}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line)}
+  .hero h1{font-size:42px;line-height:1.12;margin:0 0 14px;color:var(--brand);letter-spacing:-.5px}
+  .hero p.lead{font-size:20px;color:var(--ink);max-width:760px;margin:0 0 8px}
+  .hero p.sub{font-size:16px;color:var(--muted);max-width:760px;margin:6px 0 24px}
+  .pill{display:inline-block;background:var(--accent);color:var(--brand);
+    border:1px solid #d2e0f1;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600;margin:0 6px 6px 0}
+
+  .cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px}
+  .btn{display:inline-flex;flex-direction:column;gap:2px;padding:16px 22px;border-radius:12px;
+    border:1px solid var(--line);background:var(--card);min-width:240px;transition:.15s}
+  .btn:hover{text-decoration:none;border-color:var(--brand2);box-shadow:0 6px 22px rgba(26,60,110,.10);transform:translateY(-1px)}
+  .btn .t{font-weight:700;color:var(--brand);font-size:16px}
+  .btn .d{color:var(--muted);font-size:13.5px}
+  .btn.primary{background:var(--brand);border-color:var(--brand)}
+  .btn.primary .t{color:#fff}.btn.primary .d{color:#cdddf1}
+
+  section{padding:46px 0;border-bottom:1px solid var(--line)}
+  section h2{font-size:27px;color:var(--brand);margin:0 0 6px;letter-spacing:-.3px}
+  section .kicker{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700;color:var(--brand2);margin:0 0 10px}
+  section p{max-width:820px}
+  .muted{color:var(--muted)}
+
+  table{border-collapse:collapse;width:100%;margin:18px 0;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14.5px}
+  th{background:#f0f4fa;color:var(--brand);font-weight:700}
+  tr:last-child td{border-bottom:none}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+  .card h3{margin:0 0 6px;font-size:16px;color:var(--brand)}
+  .card p{margin:0;font-size:14px;color:var(--muted)}
+
+  blockquote{margin:18px 0;padding:14px 18px;border-left:5px solid var(--brand);
+    background:var(--accent);border-radius:0 8px 8px 0;color:var(--brand);font-size:16px}
+  blockquote strong{color:var(--brand)}
+
+  .ok{color:var(--ok);font-weight:700}
+  ol li,ul li{margin:6px 0;max-width:820px}
+
+  .ref{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:16px 18px;margin:14px 0}
+  .ref .num{flex:0 0 36px;height:36px;border-radius:9px;background:var(--brand);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:700}
+  .ref .body{flex:1}
+  .ref .body .t{font-weight:700;color:var(--brand)}
+  .ref .body .d{font-size:14px;color:var(--muted)}
+  .ref a.open{flex:0 0 auto;background:var(--accent);border:1px solid #d2e0f1;color:var(--brand);
+    font-weight:700;padding:9px 16px;border-radius:9px;font-size:14px}
+  .ref a.open:hover{text-decoration:none;background:#dfeafa}
+
+  footer{padding:34px 0 60px;color:var(--muted);font-size:14px}
+  .filelist{font-family:"SFMono-Regular",Consolas,Menlo,monospace;font-size:13.5px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="nav">
+    <span class="brand">nanda-context-graph</span>
+    <a href="#what">What it is</a>
+    <a href="#gap">The gap</a>
+    <a href="#how">How it works</a>
+    <a href="#merge">The merge</a>
+    <a href="#decks">Slides</a>
+    <a href="#status">Status</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <span class="pill">Apache 2.0</span>
+      <span class="pill">Python ≥ 3.10</span>
+      <span class="pill">Opt-in · non-breaking</span>
+      <span class="pill">For: projnanda</span>
+    </div>
+    <h1>A causal decision-trace layer<br>for the NANDA Internet of Agents</h1>
+    <p class="lead">nanda-context-graph (NCG) records <em>why</em> each agent did what it did, and links
+      cause&rarr;effect across agents into one queryable graph.</p>
+    <p class="sub">This page explains the project end-to-end and links into two decks: a project
+      presentation and a file-level merge plan. Everything below is the actual design and the
+      actual changes — no projections.</p>
+
+    <div class="cta">
+      <a class="btn primary" href="slides.html">
+        <span class="t">▶ Open the Presentation &rarr;</span>
+        <span class="d">slides.html — the project, the value, the live demo</span>
+      </a>
+      <a class="btn" href="merge.html">
+        <span class="t">▶ Open the Merge Plan &rarr;</span>
+        <span class="d">merge.html — what changes in each repo, and why</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- WHAT -->
+  <section id="what">
+    <p class="kicker">What it is</p>
+    <h2>The missing layer: explainability</h2>
+    <p>The NANDA stack already makes an agent <strong>discoverable, persistent, and
+      interoperable</strong>. What it cannot do today is answer one question:</p>
+    <blockquote><strong>"What reasoning produced this action — and what caused what across agents?"</strong></blockquote>
+    <p>When agent A delegates to B and B consults C, the decision chain lives in scattered
+      per-process logs that never join up. NCG is the layer that records each agent's reasoning
+      as a node and stitches the cause&rarr;effect chain across processes into a single graph you
+      can query — explainability and auditability for a network of autonomous agents.</p>
+  </section>
+
+  <!-- GAP / ECOSYSTEM -->
+  <section id="gap">
+    <p class="kicker">Where it fits</p>
+    <h2>One new component, riding on three that exist</h2>
+    <p>NCG does not introduce A2A messaging, discovery, or telemetry. It rides on what is already
+      there and adds the one capability none of them provide.</p>
+    <table>
+      <tr><th>Repo</th><th>Answers the question</th></tr>
+      <tr><td><strong>adapter</strong></td><td>How do I expose my agent and route <code>@agent</code> messages?</td></tr>
+      <tr><td><strong>nanda-index</strong></td><td>Where does <code>@agent-id</code> live? (the phone book)</td></tr>
+      <tr><td><strong>NEST</strong></td><td>How do I run a reasoning agent with telemetry?</td></tr>
+      <tr><td><strong>nanda-context-graph</strong> (new)</td><td><strong>What did each agent decide, why, and what caused what?</strong></td></tr>
+    </table>
+  </section>
+
+  <!-- THE RULE -->
+  <section id="rule">
+    <p class="kicker">The governing principle</p>
+    <h2>One switch makes the whole thing safe</h2>
+    <blockquote>
+      <strong>Every hook is gated on the <code>NCG_INGEST_URL</code> environment variable.</strong><br>
+      Unset = transparent pass-through. The agent behaves exactly as before.
+    </blockquote>
+    <div class="grid">
+      <div class="card"><h3>Never blocks</h3><p>All trace emission is fire-and-forget on a daemon thread; the request path is untouched.</p></div>
+      <div class="card"><h3>Never crashes</h3><p>Every hook is wrapped in <code>try/except</code>; a tracing failure cannot break message handling.</p></div>
+      <div class="card"><h3>Always additive</h3><p>New A2A headers and the registration field are optional; old peers and old indexes ignore them.</p></div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <p class="kicker">How a trace works</p>
+    <h2>From a reasoning step to a graph</h2>
+    <p>Each time an agent handles a message it reasons once — that is <strong>one decision</strong>,
+      one <code>trace_id</code> (a fresh UUID). Each decision and its reasoning steps become a
+      small subgraph; delegations link decisions across agents.</p>
+    <pre><code>(:Agent) ◄─MADE_BY─ (:Decision {trace_id, outcome, ts}) ─DECIDED_BECAUSE─► (:Step {thought, tool})
+(:Decision) ─PRECEDED_BY─► (:Decision)        ← the cross-process causal chain (via x-parent-trace)</code></pre>
+
+    <h3 style="color:var(--brand)">Continuing conversations</h3>
+    <p>The conversation thread is carried as <code>a2a_msg_id</code> (NEST's existing
+      <code>conversation_id</code>) and stays constant across turns; each turn gets its own
+      <code>trace_id</code>. So "everything in conversation X" groups by <code>a2a_msg_id</code>,
+      while "what caused this decision" follows <code>PRECEDED_BY</code>. Nested or concurrent
+      calls on one conversation are held in a LIFO stack, so each keeps its own trace.</p>
+
+    <h3 style="color:var(--brand)">Model-agnostic — bring any model, or none</h3>
+    <p>Tracing is orthogonal to reasoning: <strong>NCG never calls an LLM and never needs an API
+      key</strong>. The <code>DecisionTrace</code> schema has no model field — it stores
+      <code>agent_id</code>, <code>inputs</code>, <code>steps</code> (<code>thought</code>,
+      <code>tool_name</code>, <code>outcome</code>), <code>output</code>, <code>timestamp</code>:
+      plain JSON produced by whatever reasoned. A Gemini, GPT, rule-based, or human-in-the-loop
+      agent registers and traces identically to a Claude agent. The <code>ANTHROPIC_API_KEY</code>
+      in the demos is only the example agent's own reasoning.</p>
+  </section>
+
+  <!-- THE MERGE -->
+  <section id="merge">
+    <p class="kicker">The merge</p>
+    <h2>One new repo + three small, isolated PRs</h2>
+    <p>These are four separate git repos, so this is not one big commit. The new service is its own
+      repo; each existing repo gets a small, opt-in PR reviewed by its own maintainer. Five existing
+      files are touched, plus one new file in NEST.</p>
+    <table>
+      <tr><th>Target repo</th><th>Files</th><th>Change</th><th>Breaking?</th></tr>
+      <tr>
+        <td><strong>nanda-context-graph</strong></td>
+        <td class="filelist">(new repo)</td>
+        <td>Ingest API (7200), query API (7201), Neo4j store, dashboard</td>
+        <td>n/a — new</td>
+      </tr>
+      <tr>
+        <td><strong>projnanda/adapter</strong></td>
+        <td class="filelist">core/nanda.py<br>core/agent_bridge.py</td>
+        <td><code>traced_call()</code> around the improver; thread-local trace context;
+          <code>x-trace-id</code>/<code>x-parent-trace</code>/<code>x-reason</code> headers on
+          delegation; optional <code>trace</code> sub-doc in registration</td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>projnanda/NEST</strong></td>
+        <td class="filelist">telemetry/trace_collector.py <em>(new)</em><br>telemetry/__init__.py<br>core/agent_bridge.py</td>
+        <td><code>before_call</code>/<code>after_call</code> around <code>handle_message</code>,
+          keyed on the existing <code>conversation_id</code>; reads/stamps <code>x-parent-trace</code></td>
+        <td>No</td>
+      </tr>
+      <tr>
+        <td><strong>projnanda/nanda-index</strong></td>
+        <td class="filelist">registry.py</td>
+        <td><code>POST /register</code> stores optional <code>trace</code> sub-doc via
+          <code>data.get('trace', {})</code></td>
+        <td>No</td>
+      </tr>
+    </table>
+    <p class="muted">The file-by-file rationale for every one of these changes is the dedicated
+      merge deck &rarr; <a href="merge.html"><strong>merge.html</strong></a>, backed by the written PR
+      descriptions linked below.</p>
+  </section>
+
+  <!-- VERIFICATION -->
+  <section id="status">
+    <p class="kicker">Verification — actually run</p>
+    <h2>Proven by a real distributed demo</h2>
+    <p>Three OS processes, two frameworks (adapter + NEST), real HTTP A2A, and no agent
+      business-logic changes — only <code>NCG_INGEST_URL</code> was set.</p>
+    <img src="ncg-verification.svg" alt="Real 3-process distributed demo: broker (adapter :6000) → pricing (NEST :6100) → approval (NEST :6200), all emitting traces to POST /ingest/trace :7200 → Neo4j, with verified chain(approval) = [approval, pricing, broker]" style="display:block;width:100%;max-width:900px;margin:8px auto 4px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:14px"/>
+    <table>
+      <tr><th>Check</th><th>Result</th></tr>
+      <tr><td>Adapter integration proof</td><td class="ok">11/11</td></tr>
+      <tr><td>NEST integration proof</td><td class="ok">12/12</td></tr>
+      <tr><td>Collector unit (push/pop/current/drain + nested same-conversation)</td><td class="ok">pass</td></tr>
+      <tr><td>Query API</td><td class="ok">pass</td></tr>
+      <tr><td>Real 3-process distributed demo (3-hop chain)</td><td class="ok">pass</td></tr>
+      <tr><td>With <code>NCG_INGEST_URL</code> unset</td><td class="ok">no behavior change</td></tr>
+    </table>
+    <p class="muted">Reproduce: <code>python run_demo.py</code> — the distributed proof is Phase 6.</p>
+  </section>
+
+  <!-- DECKS + DOCS -->
+  <section id="decks">
+    <p class="kicker">Read in this order</p>
+    <h2>The full handoff</h2>
+
+    <div class="ref">
+      <div class="num">1</div>
+      <div class="body">
+        <div class="t">This page — project write-up</div>
+        <div class="d">The why, the design, and how the pieces fit. Start here.</div>
+      </div>
+    </div>
+
+    <div class="ref">
+      <div class="num">2</div>
+      <div class="body">
+        <div class="t">Presentation deck</div>
+        <div class="d">The project, its value, model-agnostic design, and the live 3-hop demo.</div>
+      </div>
+      <a class="open" href="slides.html">Open slides.html &rarr;</a>
+    </div>
+
+    <div class="ref">
+      <div class="num">3</div>
+      <div class="body">
+        <div class="t">Merge plan deck</div>
+        <div class="d">File-by-file: exactly what changes in adapter, NEST, and nanda-index — and why.</div>
+      </div>
+      <a class="open" href="merge.html">Open merge.html &rarr;</a>
+    </div>
+
+    <p class="muted" style="margin-top:22px">Supporting documents (Markdown):</p>
+    <ul>
+      <li><a href="MERGE_PROPOSAL.md">MERGE_PROPOSAL.md</a> — the one-page written proposal / cover note.</li>
+      <li><a href="INFRASTRUCTURE_AND_CHANGES.md">INFRASTRUCTURE_AND_CHANGES.md</a> — existing infrastructure vs. NCG changes, at file level.</li>
+      <li><a href="pr/PR-adapter.md">pr/PR-adapter.md</a> · <a href="pr/PR-nest.md">pr/PR-nest.md</a> · <a href="pr/PR-nanda-index.md">pr/PR-nanda-index.md</a> — the three PR descriptions.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p><strong>nanda-context-graph</strong> — decision-trace graph for the NANDA Internet of Agents.
+       Apache 2.0. Prepared for the NANDA Writing Group.</p>
+    <p>Nothing in any existing repo changes behavior until an operator sets <code>NCG_INGEST_URL</code>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

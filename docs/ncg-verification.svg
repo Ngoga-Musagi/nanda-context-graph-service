@@ -1,0 +1,109 @@
+<svg viewBox="0 0 1180 600" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+  <defs>
+    <marker id="ah" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#2f6db3"/>
+    </marker>
+    <marker id="ahd" markerWidth="11" markerHeight="11" refX="8" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0,0 L9,4 L0,8 Z" fill="#1a3c6e"/>
+    </marker>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#1a3c6e" flood-opacity="0.12"/>
+    </filter>
+    <linearGradient id="ncg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f4f86"/><stop offset="1" stop-color="#163d6c"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1180" height="600" fill="none"/>
+
+  <!-- ===== AGENT CARDS ===== -->
+  <!-- broker -->
+  <g filter="url(#sh)">
+    <rect x="70" y="120" width="300" height="124" rx="16" fill="#ffffff" stroke="#2f6db3" stroke-width="1.6"/>
+  </g>
+  <rect x="70" y="120" width="300" height="6" rx="3" fill="#1a3c6e"/>
+  <text x="220" y="162" text-anchor="middle" font-size="24" font-weight="700" fill="#1a3c6e">broker</text>
+  <text x="220" y="187" text-anchor="middle" font-size="14.5" fill="#5b6b80">REAL adapter &#183; agent hub</text>
+  <rect x="158" y="202" width="124" height="28" rx="14" fill="#eaf1fa" stroke="#d2e0f1"/>
+  <text x="220" y="221" text-anchor="middle" font-size="14" font-weight="700" fill="#1a3c6e" font-family="'SFMono-Regular',Consolas,Menlo,monospace">:6000</text>
+
+  <!-- pricing -->
+  <g filter="url(#sh)">
+    <rect x="440" y="120" width="300" height="124" rx="16" fill="#ffffff" stroke="#2f6db3" stroke-width="1.6"/>
+  </g>
+  <rect x="440" y="120" width="300" height="6" rx="3" fill="#2f6db3"/>
+  <text x="590" y="162" text-anchor="middle" font-size="24" font-weight="700" fill="#1a3c6e">pricing</text>
+  <text x="590" y="187" text-anchor="middle" font-size="14.5" fill="#5b6b80">REAL NEST &#183; reasoning agent</text>
+  <rect x="528" y="202" width="124" height="28" rx="14" fill="#eaf1fa" stroke="#d2e0f1"/>
+  <text x="590" y="221" text-anchor="middle" font-size="14" font-weight="700" fill="#1a3c6e" font-family="'SFMono-Regular',Consolas,Menlo,monospace">:6100</text>
+
+  <!-- approval -->
+  <g filter="url(#sh)">
+    <rect x="810" y="120" width="300" height="124" rx="16" fill="#ffffff" stroke="#2f6db3" stroke-width="1.6"/>
+  </g>
+  <rect x="810" y="120" width="300" height="6" rx="3" fill="#5a93cf"/>
+  <text x="960" y="162" text-anchor="middle" font-size="24" font-weight="700" fill="#1a3c6e">approval</text>
+  <text x="960" y="187" text-anchor="middle" font-size="14.5" fill="#5b6b80">REAL NEST &#183; reasoning agent</text>
+  <rect x="898" y="202" width="124" height="28" rx="14" fill="#eaf1fa" stroke="#d2e0f1"/>
+  <text x="960" y="221" text-anchor="middle" font-size="14" font-weight="700" fill="#1a3c6e" font-family="'SFMono-Regular',Consolas,Menlo,monospace">:6200</text>
+
+  <!-- ===== A2A ARROWS ===== -->
+  <line x1="372" y1="182" x2="436" y2="182" stroke="#2f6db3" stroke-width="2.4" marker-end="url(#ah)"/>
+  <rect x="372" y="92" width="64" height="24" rx="12" fill="#2f6db3"/>
+  <text x="404" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.5">A2A</text>
+  <line x1="404" y1="116" x2="404" y2="178" stroke="#2f6db3" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+
+  <line x1="742" y1="182" x2="806" y2="182" stroke="#2f6db3" stroke-width="2.4" marker-end="url(#ah)"/>
+  <rect x="742" y="92" width="64" height="24" rx="12" fill="#2f6db3"/>
+  <text x="774" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#ffffff" letter-spacing="0.5">A2A</text>
+  <line x1="774" y1="116" x2="774" y2="178" stroke="#2f6db3" stroke-width="1" stroke-dasharray="2 3" opacity="0.5"/>
+
+  <!-- ===== TRACE BADGES ===== -->
+  <g>
+    <rect x="155" y="270" width="130" height="34" rx="17" fill="#1a3c6e"/>
+    <text x="178" y="292" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">1</text>
+    <text x="208" y="292" font-size="15" font-weight="700" fill="#ffffff" font-family="'SFMono-Regular',Consolas,Menlo,monospace">trace#1</text>
+  </g>
+  <g>
+    <rect x="525" y="270" width="130" height="34" rx="17" fill="#2f6db3"/>
+    <text x="548" y="292" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">2</text>
+    <text x="578" y="292" font-size="15" font-weight="700" fill="#ffffff" font-family="'SFMono-Regular',Consolas,Menlo,monospace">trace#2</text>
+  </g>
+  <g>
+    <rect x="895" y="270" width="130" height="34" rx="17" fill="#5a93cf"/>
+    <text x="918" y="292" text-anchor="middle" font-size="15" font-weight="800" fill="#ffffff">3</text>
+    <text x="948" y="292" font-size="15" font-weight="700" fill="#ffffff" font-family="'SFMono-Regular',Consolas,Menlo,monospace">trace#3</text>
+  </g>
+
+  <!-- ===== CONVERGING TRACE BUS ===== -->
+  <line x1="220" y1="304" x2="220" y2="362" stroke="#9db8d8" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="590" y1="304" x2="590" y2="362" stroke="#9db8d8" stroke-width="2" stroke-dasharray="4 4"/>
+  <line x1="960" y1="304" x2="960" y2="362" stroke="#9db8d8" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M220 362 L960 362" stroke="#2f6db3" stroke-width="2.4" fill="none"/>
+  <line x1="590" y1="362" x2="590" y2="404" stroke="#2f6db3" stroke-width="2.4" marker-end="url(#ah)"/>
+
+  <!-- ===== NCG / Neo4j BOX ===== -->
+  <g filter="url(#sh)">
+    <rect x="350" y="408" width="480" height="78" rx="16" fill="url(#ncg)"/>
+  </g>
+  <!-- db cylinder -->
+  <g transform="translate(392,432)" fill="#dce7f4">
+    <ellipse cx="16" cy="6" rx="16" ry="6"/>
+    <path d="M0,6 L0,30 A16,6 0 0,0 32,30 L32,6" fill="#cbddf2"/>
+    <ellipse cx="16" cy="30" rx="16" ry="6" fill="#dce7f4"/>
+    <ellipse cx="16" cy="6" rx="16" ry="6" fill="#eef4fb"/>
+  </g>
+  <text x="448" y="442" font-size="17" font-weight="700" fill="#ffffff" font-family="'SFMono-Regular',Consolas,Menlo,monospace">POST /ingest/trace</text>
+  <text x="448" y="466" font-size="14.5" fill="#cdddf1">nanda-context-graph &#183; :7200 &#8594; Neo4j</text>
+
+  <!-- ===== RESULT STRIP ===== -->
+  <g filter="url(#sh)">
+    <rect x="220" y="522" width="740" height="50" rx="12" fill="#eef7f1" stroke="#bfe2cf"/>
+  </g>
+  <rect x="220" y="522" width="6" height="50" rx="3" fill="#1d7a52"/>
+  <!-- check -->
+  <circle cx="252" cy="547" r="13" fill="#1d7a52"/>
+  <path d="M246 547 l4 4 l8 -9" stroke="#ffffff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="276" y="544" font-size="15.5" font-weight="700" fill="#14304f" font-family="'SFMono-Regular',Consolas,Menlo,monospace">chain(approval) = [approval, pricing, broker]</text>
+  <text x="276" y="564" font-size="13" fill="#1d7a52" font-weight="700">verified 3-hop causal chain &#183; query API :7201</text>
+</svg>

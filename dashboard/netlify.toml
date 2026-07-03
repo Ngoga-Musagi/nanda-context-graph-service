@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Proxy API requests to your backend VM
+# Replace YOUR_SERVER_IP with your AWS/GCP instance IP
+[[redirects]]
+  from = "/api/*"
+  to = "http://YOUR_SERVER_IP:7201/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/federation/*"
+  to = "http://YOUR_SERVER_IP:7201/federation/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/health"
+  to = "http://YOUR_SERVER_IP:7201/health"
+  status = 200
+  force = true
+
+# SPA fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

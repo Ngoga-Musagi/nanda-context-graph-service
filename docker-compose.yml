@@ -1,0 +1,57 @@
+# docker-compose.yml — full local stack
+services:
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: iot_agents_db
+
+  neo4j:
+    image: neo4j:5
+    ports:
+      - "7474:7474"    # browser
+      - "7687:7687"    # bolt
+    environment:
+      NEO4J_AUTH: neo4j/password
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  ncg-ingest:
+    build: .
+    command: uvicorn ingest.main:app --host 0.0.0.0 --port 7200 --reload
+    ports:
+      - "7200:7200"
+    environment:
+      NCG_NEO4J_URI: bolt://neo4j:7687
+      NCG_NEO4J_USER: neo4j
+      NCG_NEO4J_PASSWORD: password
+      NCG_REDIS_URL: redis://redis:6379
+    depends_on:
+      - neo4j
+      - redis
+
+  ncg-api:
+    build: .
+    command: uvicorn api.query:app --host 0.0.0.0 --port 7201 --reload
+    ports:
+      - "7201:7201"
+    environment:
+      NCG_NEO4J_URI: bolt://neo4j:7687
+      NCG_NEO4J_USER: neo4j
+      NCG_NEO4J_PASSWORD: password
+    depends_on:
+      - neo4j
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        VITE_API_URL: ""
+    ports:
+      - "8080:80"
+    depends_on:
+      - ncg-api

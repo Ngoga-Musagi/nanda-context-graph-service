@@ -1,0 +1,38 @@
+[project]
+name = "nanda-context-graph"
+version = "0.1.0"
+description = "Decentralized decision-trace graph for the NANDA Internet of Agents"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.29",
+    "pydantic>=2.7",
+    "neo4j>=5.20",
+    "redis>=5.0",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "click>=8.1",
+    "requests>=2.31",        # mirrors adapter (sync HTTP for fire-and-forget)
+    "flask-cors>=4.0",       # if ncg embeds a Flask compat shim for index
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "testcontainers[neo4j]>=4.0",
+]
+
+[project.scripts]
+ncg = "cli.main:cli"
+
+[tool.hatch.build.targets.wheel]
+packages = ["schema", "store", "api", "ingest", "middleware", "federation", "cli", "dashboard"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

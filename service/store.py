@@ -409,6 +409,91 @@ class Neo4jGraphStore:
         self._driver.close()
 
 
+class ResilientStore:
+    """Wrap a primary store and fall back to a seeded in-memory store on failure.
+
+    The primary (Neo4j Aura Free) can become unreachable *after* boot — Aura Free
+    auto-pauses after a few idle days, at which point its hostname stops resolving
+    and every query raises. Without this wrapper the service would 500 on every
+    request until redeployed. Here, the first primary failure transparently and
+    permanently degrades this process to an in-memory store pre-loaded with the
+    same seed decisions, so the endpoints keep answering. On the next
+    deploy/restart the primary is retried fresh (see :func:`create_store`).
+    """
+
+    def __init__(self, primary: GraphStore, seed_records: list[dict[str, Any]]) -> None:
+        self._primary = primary
+        self._seed_records = seed_records
+        self._fallback: InMemoryGraphStore | None = None
+        self._degraded = False
+
+    @property
+    def backend(self) -> str:
+        return "memory(fallback)" if self._degraded else self._primary.backend
+
+    def _degrade(self) -> InMemoryGraphStore:
+        if self._fallback is None:
+            fb = InMemoryGraphStore()
+            for record in self._seed_records:
+                fb.write_trace(record)
+            self._fallback = fb
+            logger.warning(
+                "Primary store unavailable; degraded to in-memory with %d seed decisions",
+                fb.count(),
+            )
+        self._degraded = True
+        return self._fallback
+
+    def _run(self, method: str, *args: Any, **kwargs: Any) -> Any:
+        if not self._degraded:
+            try:
+                return getattr(self._primary, method)(*args, **kwargs)
+            except Exception as exc:  # Neo4j down mid-life → degrade, don't 500
+                logger.warning("Primary store '%s' failed (%s); degrading", method, exc)
+                self._degrade()
+        return getattr(self._fallback, method)(*args, **kwargs)
+
+    def write_trace(self, record: dict[str, Any]) -> None:
+        self._run("write_trace", record)
+
+    def get_trace(self, trace_id: str) -> dict[str, Any] | None:
+        return self._run("get_trace", trace_id)
+
+    def why(self, agent_id: str) -> dict[str, Any] | None:
+        return self._run("why", agent_id)
+
+    def agent_history(
+        self, agent_id: str, limit: int = 20, outcome: str | None = None
+    ) -> list[dict[str, Any]]:
+        return self._run("agent_history", agent_id, limit, outcome)
+
+    def causal_chain(self, trace_id: str, max_depth: int = 20) -> list[str]:
+        return self._run("causal_chain", trace_id, max_depth)
+
+    def candidates(
+        self, agent_id: str | None = None, outcome: str | None = None
+    ) -> list[dict[str, Any]]:
+        return self._run("candidates", agent_id, outcome)
+
+    def missing_embeddings(self) -> list[tuple[str, str]]:
+        return self._run("missing_embeddings")
+
+    def set_embedding(self, trace_id: str, embedding: list[float]) -> None:
+        self._run("set_embedding", trace_id, embedding)
+
+    def count(self) -> int:
+        return self._run("count")
+
+    def ping(self) -> bool:
+        try:
+            return bool(self._run("ping"))
+        except Exception:
+            return False
+
+    def close(self) -> None:
+        self._primary.close()
+
+
 def create_store(uri: str | None, user: str, password: str) -> GraphStore:
     """Return a Neo4j store when a URI is set and reachable, else in-memory.
 

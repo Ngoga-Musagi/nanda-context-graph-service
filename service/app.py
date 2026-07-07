@@ -32,7 +32,7 @@ from schema.models import DecisionTrace
 from service.embeddings import Embedder
 from service.precedent import rank_precedents
 from service.seed import seed_records, trace_to_record
-from service.store import GraphStore, create_store
+from service.store import GraphStore, ResilientStore, create_store
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ncg.app")
@@ -54,16 +54,15 @@ def _embed_and_write(record: dict) -> None:
     state.store.write_trace(record)
 
 
-def _seed_store() -> None:
+def _build_seed_records() -> list[dict]:
+    """Seed records with embeddings attached (when an embedding key is active)."""
     records = seed_records()
     if state.embedder.active:
         vectors = state.embedder.embed([r["precedent_text"] for r in records])
         if vectors:
             for record, vector in zip(records, vectors, strict=False):
                 record["embedding"] = vector
-    for record in records:
-        state.store.write_trace(record)
-    logger.info("Seeded %d decisions (store now holds %d)", len(records), state.store.count())
+    return records
 
 
 def _backfill_embeddings() -> None:
@@ -91,12 +90,19 @@ async def _keepwarm() -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     state.embedder = Embedder()
-    state.store = create_store(
+    primary = create_store(
         uri=os.getenv("NCG_NEO4J_URI"),
         user=os.getenv("NCG_NEO4J_USER", "neo4j"),
         password=os.getenv("NCG_NEO4J_PASSWORD", "password"),
     )
-    _seed_store()
+    records = _build_seed_records()
+    # Wrap a live Neo4j primary so a *later* Aura pause degrades to in-memory
+    # instead of 500-ing every request. An in-memory primary can't fail, so it
+    # is used as-is.
+    state.store = ResilientStore(primary, records) if primary.backend == "neo4j" else primary
+    for record in records:
+        state.store.write_trace(record)
+    logger.info("Seeded %d decisions (store now holds %d)", len(records), state.store.count())
     _backfill_embeddings()
     warm_task = asyncio.create_task(_keepwarm())
     yield

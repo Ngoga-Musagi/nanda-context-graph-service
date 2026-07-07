@@ -56,7 +56,7 @@ Response:
     {
       "trace_id": "seed-discount-001",
       "agent_id": "discount-approval",
-      "similarity": 0.91,
+      "similarity": 0.72,
       "situation": {"request": "Gold-tier member requests 15% discount ..."},
       "outcome": "failure",
       "how_it_was_handled": "failure: Rejected: 15% exceeds the 10% auto-approval ceiling; routed to manager queue",
@@ -123,14 +123,14 @@ curl -s -X POST "$BASE/ingest/trace" \
 **Field reference:**
 - `trace_id` (string, required) — your unique id for this decision. Re-sending the same id updates it (idempotent).
 - `agent_id` (string, required) — who made the decision.
-- `inputs` (object, required) — the situation you faced.
+- `inputs` (object, required) — the situation you faced. Free-form JSON; put
+  whatever keys fit (e.g. `request`, `tier`, `requested_pct`). Extra keys are
+  stored and returned as-is.
 - `steps` (array, required) — your reasoning. Each step: `step_id`, `step_type`
   (`retrieve` | `evaluate` | `decide` | `delegate` | `execute` | `error`),
   `thought`, optional `tool_name`, optional `confidence` (0–1).
-- `inputs` / `output` (objects) — free-form JSON; put whatever keys fit the
-  situation (e.g. `tier`, `requested_pct`, `escalated_to`). Extra keys are stored
-  and returned as-is.
-- `output` (object, required) — what you decided.
+- `output` (object, required) — what you decided. Free-form JSON, same as `inputs`
+  (e.g. `approved`, `counter_offer_pct`, `escalated_to`).
 - `outcome` (string, required) — the disposition of the decision, **not** a grade
   of your own performance:
   - `success` — the request was granted / fulfilled (e.g. discount approved).

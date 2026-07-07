@@ -9,7 +9,66 @@ from service.precedent import (
     how_it_was_handled,
     rank_precedents,
 )
-from service.store import InMemoryGraphStore
+from service.store import InMemoryGraphStore, ResilientStore
+
+
+# ── resilient store (Aura-pause safety) ───────────────────────────
+
+
+class _FlakyStore:
+    """A primary that works until `.break_now()`, then raises on every call."""
+
+    backend = "neo4j"
+
+    def __init__(self):
+        self._inner = InMemoryGraphStore()
+        self._broken = False
+
+    def break_now(self):
+        self._broken = True
+
+    def __getattr__(self, name):
+        inner_attr = getattr(self._inner, name)
+        if not callable(inner_attr):
+            return inner_attr
+
+        def _wrapped(*args, **kwargs):
+            if self._broken:
+                raise ConnectionError("simulated Aura pause: name resolution failed")
+            return inner_attr(*args, **kwargs)
+
+        return _wrapped
+
+
+def _seed():
+    return [
+        {"trace_id": "seed-1", "agent_id": "a", "outcome": "failure",
+         "timestamp_ms": 1, "inputs": {"request": "x"}, "output": {}, "steps": [],
+         "precedent_text": "x", "embedding": None},
+    ]
+
+
+def test_resilient_store_serves_from_primary_until_it_fails():
+    primary = _FlakyStore()
+    store = ResilientStore(primary, _seed())
+    store.write_trace(_seed()[0])
+    assert store.backend == "neo4j"
+    assert store.get_trace("seed-1")["agent_id"] == "a"
+
+
+def test_resilient_store_degrades_to_seeded_fallback_on_primary_failure():
+    primary = _FlakyStore()
+    store = ResilientStore(primary, _seed())
+    primary.break_now()  # Aura "pauses"
+    # A read that would have 500-ed now transparently answers from the fallback,
+    # which is pre-loaded with the seed decisions.
+    got = store.get_trace("seed-1")
+    assert got is not None
+    assert got["agent_id"] == "a"
+    assert store.backend == "memory(fallback)"
+    # stays degraded and still serves subsequent calls
+    assert store.count() == 1
+    assert store.ping() is True
 
 
 # ── precedent text + summary ──────────────────────────────────────

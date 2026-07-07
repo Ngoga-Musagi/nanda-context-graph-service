@@ -14,6 +14,18 @@ for precedent. After you decide, record your decision back to me.
 
 ---
 
+## Endpoints
+
+- `POST https://nanda-context-graph-production.up.railway.app/api/v1/precedent` — recall the most similar past decisions
+- `POST https://nanda-context-graph-production.up.railway.app/ingest/trace` — record your decision as a trace
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/why?agent_id={agent_id}` — an agent's most recent decision + reasoning
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/trace/{trace_id}` — one full decision by id
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/agent/{agent_id}/history` — an agent's recent decisions (newest first)
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/chain/{trace_id}/causal` — follow `parent_trace_id` back to the root (delegation chain)
+- `GET https://nanda-context-graph-production.up.railway.app/health` — health check
+
+---
+
 ## Ordering: recall now, your own writes are readable after you POST
 
 The store ships **pre-seeded**, so **recall precedent right away — no write needed
@@ -32,7 +44,7 @@ If you `POST /ingest/trace` and then immediately read it back, use the
 
 ## The 3 endpoints that matter
 
-### 1. Recall precedent — `POST /api/v1/precedent`
+### 1. Recall precedent — `POST https://nanda-context-graph-production.up.railway.app/api/v1/precedent`
 
 Find the most similar past decisions and **how each was handled**.
 
@@ -87,7 +99,7 @@ confidence — a strong top match often lands around 0.6–0.8, not 0.9+. Trust 
 
 ---
 
-### 2. Record your decision — `POST /ingest/trace`
+### 2. Record your decision — `POST https://nanda-context-graph-production.up.railway.app/ingest/trace`
 
 Write your decision so it becomes precedent for future agents.
 
@@ -145,7 +157,7 @@ curl -s -X POST "$BASE/ingest/trace" \
 
 ---
 
-### 3. Ask why — `GET /api/v1/why?agent_id=...`
+### 3. Ask why — `GET https://nanda-context-graph-production.up.railway.app/api/v1/why?agent_id={agent_id}`
 
 Get an agent's most recent decision with its full reasoning.
 
@@ -164,11 +176,11 @@ curl -s "$BASE/api/v1/why?agent_id=discount-approval"
 
 ## Other useful reads
 
-- `GET /api/v1/trace/{trace_id}` — one full decision by id.
-- `GET /api/v1/agent/{agent_id}/history?limit=10&outcome=success` — an agent's recent decisions.
-- `GET /api/v1/chain/{trace_id}/causal` — follow `parent_trace_id` links back to the root decision (delegation chain).
-- `GET /` — service banner + live status (store backend, decisions stored, ranking mode).
-- `GET /health` — `{"status":"ok"}`.
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/trace/{trace_id}` — one full decision by id.
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/agent/{agent_id}/history?limit=10&outcome=success` — an agent's recent decisions.
+- `GET https://nanda-context-graph-production.up.railway.app/api/v1/chain/{trace_id}/causal` — follow `parent_trace_id` links back to the root decision (delegation chain).
+- `GET https://nanda-context-graph-production.up.railway.app/` — service banner + live status (store backend, decisions stored, ranking mode).
+- `GET https://nanda-context-graph-production.up.railway.app/health` — `{"status":"ok"}`.
 
 ---
 

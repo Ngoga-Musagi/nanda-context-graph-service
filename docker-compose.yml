@@ -50,7 +50,10 @@ services:
     build:
       context: ./dashboard
       args:
-        VITE_API_URL: ""
+        # Browser reaches the host-mapped query API directly (CORS is open);
+        # no nginx proxy needed. For the hosted build, VITE_API_URL is the
+        # public service URL instead.
+        VITE_API_URL: "http://localhost:7201"
     ports:
       - "8080:80"
     depends_on:

@@ -13,26 +13,28 @@ export default function App() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  async function fetchWhy() {
-    if (!agentId.trim()) return;
+  async function fetchWhy(id) {
+    const aid = (typeof id === "string" ? id : agentId).trim();
+    if (!aid) return;
+    setAgentId(aid);
     setLoading(true);
     setError(null);
     setCausalChain(null);
     setSelectedTrace(null);
     try {
       const [whyRes, histRes] = await Promise.all([
-        fetch(`${API}/api/v1/why?agent_id=${encodeURIComponent(agentId)}`),
-        fetch(`${API}/api/v1/agent/${encodeURIComponent(agentId)}/history?limit=20`),
+        fetch(`${API}/api/v1/why?agent_id=${encodeURIComponent(aid)}`),
+        fetch(`${API}/api/v1/agent/${encodeURIComponent(aid)}/history?limit=20`),
       ]);
       if (whyRes.ok) {
         setDecision(await whyRes.json());
       } else {
         setDecision(null);
-        setError(`No traces found for agent "${agentId}"`);
+        setError(`No traces found for agent "${aid}"`);
       }
       if (histRes.ok) {
         const data = await histRes.json();
-        setHistory(data.traces || []);
+        setHistory(data.decisions || data.traces || []);
       }
     } catch (e) {
       setError(e.message);
@@ -96,21 +98,14 @@ export default function App() {
           onChange={(e) => setAgentId(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && fetchWhy()}
         />
-        <button style={styles.button} onClick={fetchWhy} disabled={loading}>
+        <button style={styles.button} onClick={() => fetchWhy()} disabled={loading}>
           {loading ? "Loading..." : "Why did this agent act?"}
         </button>
       </div>
 
       <div style={styles.quickLinks}>
         {["rental-broker", "rental-pricing", "rental-approval"].map((id) => (
-          <button
-            key={id}
-            style={styles.chipButton}
-            onClick={() => { setAgentId(id); setTimeout(() => {
-              document.querySelector("button[class]")?.click();
-            }, 50); setAgentId(id); }}
-            onClickCapture={() => { setAgentId(id); }}
-          >
+          <button key={id} style={styles.chipButton} onClick={() => fetchWhy(id)}>
             @{id}
           </button>
         ))}

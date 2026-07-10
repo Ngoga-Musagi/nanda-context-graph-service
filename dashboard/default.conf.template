@@ -1,10 +1,10 @@
 server {
-    listen 80;
+    listen ${PORT};
     root /usr/share/nginx/html;
     index index.html;
 
     # Static SPA only. The app fetches the decision-memory service directly at
-    # VITE_API_URL (an absolute URL baked in at build time, CORS is open on the
+    # VITE_API_URL (absolute URL baked in at build time, CORS open on the
     # service), so no API proxy is needed here.
     location / {
         try_files $uri $uri/ /index.html;

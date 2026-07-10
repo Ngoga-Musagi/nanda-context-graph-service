@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>nanda-context-graph — demo slides</title>
+<style>
+  :root { --bg:#0b1020; --card:#121a33; --fg:#e8ecf8; --muted:#9fb0d6; --accent:#5b8cff; --good:#3ddc97; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif; }
+  .deck { height:100vh; overflow:hidden; }
+  .slide { height:100vh; width:100vw; display:none; flex-direction:column; justify-content:center;
+    padding:8vh 10vw; animation:fade .35s ease; }
+  .slide.active { display:flex; }
+  @keyframes fade { from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none} }
+  h1 { font-size:4vw; margin:0 0 .3em; line-height:1.05; }
+  h2 { font-size:2.4vw; margin:0 0 .8em; color:var(--accent); }
+  p, li { font-size:1.6vw; line-height:1.5; color:var(--fg); }
+  .muted { color:var(--muted); }
+  .tag { display:inline-block; background:var(--card); border:1px solid #24325e; color:var(--muted);
+    padding:.35em .8em; border-radius:999px; font-size:1.1vw; margin:.2em .3em .2em 0; }
+  .url { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--good); font-size:1.5vw; }
+  .cols { display:flex; gap:5vw; margin-top:1em; }
+  .cols > div { flex:1; }
+  ul { margin:.2em 0; padding-left:1.1em; }
+  li { margin:.35em 0; }
+  .kicker { color:var(--accent); font-size:1.3vw; letter-spacing:.15em; text-transform:uppercase; margin-bottom:.6em; }
+  .foot { position:fixed; bottom:3vh; left:10vw; right:10vw; display:flex; justify-content:space-between;
+    color:var(--muted); font-size:1vw; }
+  .big { color:var(--good); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- SLIDE 1 — TITLE -->
+  <section class="slide active">
+    <div class="kicker">NANDA Town · Hackathon Phase 2</div>
+    <h1>nanda-context-graph</h1>
+    <h2>Cross-Agent Decision Memory</h2>
+    <p class="muted" style="max-width:70%">
+      Agents recall how similar decisions were handled before, decide consistently,
+      and record their own decisions as precedent &mdash; over a queryable causal graph of <em>why</em>.
+    </p>
+    <p style="margin-top:1.2em"><span class="url">https://nanda-context-graph-production.up.railway.app</span></p>
+    <div class="foot"><span>Ngoga-Musagi</span><span>&rarr; / space to advance</span></div>
+  </section>
+
+  <!-- SLIDE 2 — PROBLEM -> WHAT -->
+  <section class="slide">
+    <div class="kicker">The problem &amp; the idea</div>
+    <div class="cols">
+      <div>
+        <h2>Agents are black boxes</h2>
+        <ul>
+          <li>They make judgment calls with <b>no shared memory</b> of how past ones went.</li>
+          <li>They can't explain <b>why</b> &mdash; or trace a decision across the agents that made it.</li>
+          <li>So they drift: inconsistent, un-auditable, hard to trust.</li>
+        </ul>
+      </div>
+      <div>
+        <h2>A hosted decision memory</h2>
+        <ul>
+          <li><b>Recall</b> precedent &middot; <b>record</b> a decision &middot; <b>ask why</b></li>
+          <li>One <b>SKILL.md</b>, 3 endpoints, no auth &mdash; <span class="muted">nothing to install</span></li>
+          <li><b>Semantic</b> recall (embeddings) + a <b>causal graph</b> (Neo4j)</li>
+        </ul>
+        <div style="margin-top:.8em">
+          <span class="tag">Useful</span><span class="tag">Creative</span>
+          <span class="tag">Zero setup</span><span class="tag">Agent-native</span>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span>nanda-context-graph</span><span>live demo next &rarr;</span></div>
+  </section>
+
+  <!-- SLIDE 3 — CLOSE -->
+  <section class="slide">
+    <div class="kicker">What you just saw</div>
+    <h1 style="font-size:3vw">Consistent decisions <span class="muted">+</span> an auditable <span class="big">why</span></h1>
+    <ul style="margin-top:.6em">
+      <li>Semantic <b>precedent recall</b> keeps agents consistent with past practice.</li>
+      <li>Every decision is a <b>trace</b> &mdash; inputs, reasoning, tool calls, outcome.</li>
+      <li><b>Causal chains</b> link decisions across agents: follow <em>why</em> back to the root.</li>
+      <li class="big">A fresh agent used it end-to-end from the SKILL.md alone &mdash; verified in the graph DB.</li>
+    </ul>
+    <p style="margin-top:1em"><span class="url">https://nanda-context-graph-production.up.railway.app</span>
+      <span class="muted"> &middot; live now, no setup</span></p>
+    <div class="foot"><span>Thank you</span><span>Ngoga-Musagi</span></div>
+  </section>
+
+</div>
+<script>
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = 0;
+  function show(n){ slides[i].classList.remove('active'); i=Math.max(0,Math.min(slides.length-1,n)); slides[i].classList.add('active'); }
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)) { e.preventDefault(); show(i+1); }
+    if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); show(i-1); }
+    if (e.key === 'Home') show(0); if (e.key === 'End') show(slides.length-1);
+  });
+  document.addEventListener('click', () => show(i+1));
+</script>
+</body>
+</html>
